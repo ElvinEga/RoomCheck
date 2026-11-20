@@ -4,8 +4,8 @@
 pub mod theme;
 pub mod widgets;
 
-use crate::analysis::{format_rt60, IrAnalysis};
-use crate::dsp::{Meters, BLOCK, SPECTRUM_BANDS};
+use crate::analysis::{IrAnalysis, format_rt60};
+use crate::dsp::{BLOCK, Meters, SPECTRUM_BANDS};
 use crate::params::RoomcheckParams;
 use crate::presets::{self, Category, Icon, Preset};
 use egui::{
@@ -173,7 +173,8 @@ impl RoomcheckEditor {
             .read()
             .map(|l| l.clone())
             .unwrap_or_default();
-        let selected = (self.params.preset.value().max(0) as usize).min(library.len().saturating_sub(1));
+        let selected =
+            (self.params.preset.value().max(0) as usize).min(library.len().saturating_sub(1));
         if selected != self.last_preset as usize {
             self.last_preset = selected as i32;
         }
@@ -205,7 +206,8 @@ impl RoomcheckEditor {
         }
 
         // Meters and the live spectrum both need a continuous repaint.
-        ui.ctx().request_repaint_after(std::time::Duration::from_millis(33));
+        ui.ctx()
+            .request_repaint_after(std::time::Duration::from_millis(33));
     }
 }
 
@@ -222,14 +224,14 @@ impl RoomcheckEditor {
         let header = Rect::from_min_size(Pos2::ZERO, Vec2::new(WIDTH, HEADER));
         painter.rect_filled(header, CornerRadius::ZERO, BG_BAR);
         painter.line_segment(
-            [
-                Pos2::new(0.0, HEADER - 0.5),
-                Pos2::new(WIDTH, HEADER - 0.5),
-            ],
+            [Pos2::new(0.0, HEADER - 0.5), Pos2::new(WIDTH, HEADER - 0.5)],
             Stroke::new(1.0, BORDER),
         );
 
-        w::logo(painter, Rect::from_min_size(Pos2::new(20.0, 14.0), Vec2::splat(28.0)));
+        w::logo(
+            painter,
+            Rect::from_min_size(Pos2::new(20.0, 14.0), Vec2::splat(28.0)),
+        );
         painter.text(
             Pos2::new(58.0, 20.0),
             Align2::LEFT_CENTER,
@@ -255,7 +257,11 @@ impl RoomcheckEditor {
             w::arrow(painter, rect, is_prev, TEXT_PRIMARY);
         }
         if w::pressable(ui, ui.scope_id().with("prev_ref"), prev).clicked() && !library.is_empty() {
-            let idx = if selected == 0 { library.len() - 1 } else { selected - 1 };
+            let idx = if selected == 0 {
+                library.len() - 1
+            } else {
+                selected - 1
+            };
             sink.set_int(&self.params.preset, idx as i32);
         }
         if w::pressable(ui, ui.scope_id().with("next_ref"), next).clicked() && !library.is_empty() {
@@ -266,7 +272,12 @@ impl RoomcheckEditor {
         w::rounded(painter, pill, 10, BG_INPUT, Stroke::new(1.0, BORDER_SUBTLE));
         let (name, sub) = preset
             .map(|p| (p.name.clone(), p.subtitle()))
-            .unwrap_or_else(|| ("No reference loaded".to_owned(), "Import a WAV to begin".to_owned()));
+            .unwrap_or_else(|| {
+                (
+                    "No reference loaded".to_owned(),
+                    "Import a WAV to begin".to_owned(),
+                )
+            });
         let name_w = (name.chars().count() as f32 * 8.4).min(150.0);
         painter.text(
             Pos2::new(pill.center().x - 6.0, pill.center().y),
@@ -305,7 +316,13 @@ impl RoomcheckEditor {
             TEXT_MUTED,
         );
 
-        w::rounded(painter, settings, 10, Color32::TRANSPARENT, Stroke::new(1.0, BORDER_SUBTLE));
+        w::rounded(
+            painter,
+            settings,
+            10,
+            Color32::TRANSPARENT,
+            Stroke::new(1.0, BORDER_SUBTLE),
+        );
         w::sliders_icon(painter, settings.shrink(9.0), TEXT_MUTED);
         if w::pressable(ui, ui.scope_id().with("settings"), settings)
             .on_hover_text("Open the Roomcheck IR folder")
@@ -328,7 +345,8 @@ impl RoomcheckEditor {
         library: &[Preset],
         selected: usize,
     ) {
-        let sidebar = Rect::from_min_size(Pos2::new(0.0, HEADER), Vec2::new(SIDEBAR, HEIGHT - HEADER));
+        let sidebar =
+            Rect::from_min_size(Pos2::new(0.0, HEADER), Vec2::new(SIDEBAR, HEIGHT - HEADER));
         painter.rect_filled(sidebar, CornerRadius::ZERO, BG_BAR);
         painter.line_segment(
             [
@@ -340,7 +358,13 @@ impl RoomcheckEditor {
 
         // Search.
         let search = Rect::from_min_size(Pos2::new(14.0, HEADER + 14.0), Vec2::new(220.0, 36.0));
-        w::rounded(painter, search, 8, BG_INPUT, Stroke::new(1.0, BORDER_SUBTLE));
+        w::rounded(
+            painter,
+            search,
+            8,
+            BG_INPUT,
+            Stroke::new(1.0, BORDER_SUBTLE),
+        );
         painter.circle_stroke(
             Pos2::new(search.left() + 18.0, search.center().y - 1.0),
             5.0,
@@ -422,7 +446,10 @@ impl RoomcheckEditor {
             Stroke::new(2.0, TEXT_BODY),
         );
         painter.galley(
-            Pos2::new(start_x + icon_w + gap, import.center().y - text_galley.size().y * 0.5),
+            Pos2::new(
+                start_x + icon_w + gap,
+                import.center().y - text_galley.size().y * 0.5,
+            ),
             text_galley,
             TEXT_BODY,
         );
@@ -490,8 +517,10 @@ impl RoomcheckEditor {
             let Some(preset) = library.get(index) else {
                 continue;
             };
-            let (alloc_rect, response) = ui.allocate_exact_size(Vec2::new(220.0, 38.0), Sense::click());
-            let row = Rect::from_min_size(Pos2::new(14.0, alloc_rect.top()), Vec2::new(220.0, 38.0));
+            let (alloc_rect, response) =
+                ui.allocate_exact_size(Vec2::new(220.0, 38.0), Sense::click());
+            let row =
+                Rect::from_min_size(Pos2::new(14.0, alloc_rect.top()), Vec2::new(220.0, 38.0));
             let is_selected = index == selected;
             let painter = ui.painter();
             if is_selected {
@@ -509,7 +538,10 @@ impl RoomcheckEditor {
             w::draw_icon(
                 ui,
                 preset.icon,
-                Rect::from_min_size(Pos2::new(row.left() + 10.0, row.center().y - 10.0), Vec2::splat(20.0)),
+                Rect::from_min_size(
+                    Pos2::new(row.left() + 10.0, row.center().y - 10.0),
+                    Vec2::splat(20.0),
+                ),
                 icon_colour,
             );
 
@@ -518,7 +550,10 @@ impl RoomcheckEditor {
             let tag_galley = painter.layout_no_wrap(tag.to_string(), tag_font, TEXT_MUTED);
             let tag_w = tag_galley.size().x;
             painter.galley(
-                Pos2::new(row.right() - 10.0 - tag_w, row.center().y - tag_galley.size().y * 0.5),
+                Pos2::new(
+                    row.right() - 10.0 - tag_w,
+                    row.center().y - tag_galley.size().y * 0.5,
+                ),
                 tag_galley,
                 TEXT_MUTED,
             );
@@ -587,7 +622,8 @@ impl RoomcheckEditor {
             Pos2::new(left + map_w + 12.0, mid_y),
             Vec2::new(width - map_w - 12.0, mid_h),
         );
-        let rack = Rect::from_min_size(Pos2::new(left, rack_y), Vec2::new(width, rack_h.max(180.0)));
+        let rack =
+            Rect::from_min_size(Pos2::new(left, rack_y), Vec2::new(width, rack_h.max(180.0)));
 
         self.paint_hero(ui, painter, preset, hero);
         self.paint_map(ui, painter, preset, map);
@@ -617,7 +653,10 @@ impl RoomcheckEditor {
         for i in 0..4 {
             let x = lx + i as f32 * 6.0;
             painter.line_segment(
-                [Pos2::new(x, rect.top() + 25.0), Pos2::new(x + 4.0, rect.top() + 25.0)],
+                [
+                    Pos2::new(x, rect.top() + 25.0),
+                    Pos2::new(x + 4.0, rect.top() + 25.0),
+                ],
                 Stroke::new(1.5, Color32::from_rgb(0x8d, 0x89, 0x7f)),
             );
         }
@@ -673,13 +712,14 @@ impl RoomcheckEditor {
             &self.spectrum,
             ACCENT,
         );
-
     }
 
     fn paint_map(&self, ui: &mut Ui, painter: &egui::Painter, preset: Option<&Preset>, rect: Rect) {
         w::card(painter, rect);
         let icon = preset.map(|p| p.icon).unwrap_or(Icon::Speaker);
-        let is_space = preset.map(|p| p.category == Category::Space).unwrap_or(false);
+        let is_space = preset
+            .map(|p| p.category == Category::Space)
+            .unwrap_or(false);
         let title = if is_space {
             "Listening position"
         } else {
@@ -705,11 +745,7 @@ impl RoomcheckEditor {
             sg(11.0, 400),
             TEXT_MUTED,
         );
-        painter.circle_filled(
-            Pos2::new(map_right - 26.0, rect.top() + 22.0),
-            3.5,
-            ACCENT,
-        );
+        painter.circle_filled(Pos2::new(map_right - 26.0, rect.top() + 22.0), 3.5, ACCENT);
         painter.text(
             Pos2::new(map_right - 4.0, rect.top() + 22.0),
             Align2::RIGHT_CENTER,
@@ -749,10 +785,7 @@ impl RoomcheckEditor {
                     "Imported".to_owned()
                 },
             ),
-            (
-                "IR length",
-                format_duration(self.analysis.ir_length_sec),
-            ),
+            ("IR length", format_duration(self.analysis.ir_length_sec)),
             ("RT60", format_rt60(self.analysis.rt60_sec)),
             (
                 "Channels",
@@ -805,12 +838,7 @@ impl RoomcheckEditor {
             Pos2::new(rect.left() + 14.0, rect.top() + 42.0),
             Pos2::new(rect.right() - 14.0, rect.bottom() - 26.0),
         );
-        let early: Vec<(f32, f32)> = self
-            .analysis
-            .early
-            .iter()
-            .map(|e| (e.t, e.db))
-            .collect();
+        let early: Vec<(f32, f32)> = self.analysis.early.iter().map(|e| (e.t, e.db)).collect();
         w::decay_plot(
             painter,
             plot,
@@ -884,7 +912,11 @@ impl RoomcheckEditor {
             painter,
             original,
             10,
-            if pressed { mix(BG_CARD, ACCENT, 0.10) } else { Color32::TRANSPARENT },
+            if pressed {
+                mix(BG_CARD, ACCENT, 0.10)
+            } else {
+                Color32::TRANSPARENT
+            },
             Stroke::new(1.0, if pressed { ACCENT } else { BORDER_STRONG }),
         );
         painter.text(
@@ -915,11 +947,10 @@ impl RoomcheckEditor {
             4.0,
             ACCENT_INK,
         );
-        let name = preset.map(|p| p.name.clone()).unwrap_or_else(|| "—".to_owned());
         painter.text(
             Pos2::new(reference.left() + 30.0, reference.center().y),
             Align2::LEFT_CENTER,
-            truncate(&name, 20),
+            "Reference",
             sg(14.0, 600),
             ACCENT_INK,
         );
@@ -950,7 +981,9 @@ impl RoomcheckEditor {
         let knob_top = inner.top() + 14.0;
         let knob_h = 118.0;
 
-        let is_space = preset.map(|p| p.category == Category::Space).unwrap_or(false);
+        let is_space = preset
+            .map(|p| p.category == Category::Space)
+            .unwrap_or(false);
         let distance_value = if is_space {
             format!("{:.0}%", self.params.distance.value() * 100.0)
         } else {
@@ -1090,15 +1123,9 @@ impl RoomcheckEditor {
             }
         }
     }
-
 }
 
-fn truncate_to_width(
-    painter: &egui::Painter,
-    text: &str,
-    font_id: &FontId,
-    max_w: f32,
-) -> String {
+fn truncate_to_width(painter: &egui::Painter, text: &str, font_id: &FontId, max_w: f32) -> String {
     let full_w = painter
         .layout_no_wrap(text.to_owned(), font_id.clone(), Color32::WHITE)
         .size()
@@ -1171,7 +1198,6 @@ fn format_lufs(value: f32) -> String {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1229,9 +1255,12 @@ mod tests {
             .with_context_setup(|ctx| {
                 theme::install(ctx);
             })
-            .build_ui_state(move |ui, state: &mut RoomcheckEditor| {
-                state.render(ui, &Sink::headless());
-            }, editor);
+            .build_ui_state(
+                move |ui, state: &mut RoomcheckEditor| {
+                    state.render(ui, &Sink::headless());
+                },
+                editor,
+            );
 
         harness.run();
 
@@ -1244,12 +1273,12 @@ mod tests {
         println!("wrote {}", path.display());
 
         // Make sure the canvas was actually painted, not left transparent.
-        let painted = image
-            .pixels()
-            .filter(|p| p[3] > 0)
-            .count() as f32
-            / (WIDTH * HEIGHT);
-        assert!(painted > 0.95, "only {:.0}% of the canvas was painted", painted * 100.0);
+        let painted = image.pixels().filter(|p| p[3] > 0).count() as f32 / (WIDTH * HEIGHT);
+        assert!(
+            painted > 0.95,
+            "only {:.0}% of the canvas was painted",
+            painted * 100.0
+        );
     }
 
     #[test]
@@ -1268,7 +1297,10 @@ mod tests {
                 let long = "Very Long Impulse Response Name That Exceeds Available Width";
                 let truncated = truncate_to_width(painter, long, &font, 80.0);
                 assert!(truncated.ends_with('…'));
-                let w = painter.layout_no_wrap(truncated, font, Color32::WHITE).size().x;
+                let w = painter
+                    .layout_no_wrap(truncated, font, Color32::WHITE)
+                    .size()
+                    .x;
                 assert!(w <= 80.0);
             });
         harness.run();
