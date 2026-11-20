@@ -985,9 +985,142 @@ impl RoomcheckEditor {
 
         let knob_left = listen.right() + 32.0;
         let knob_right = right_divider_x - 16.0;
+
+        // Header & Reset button
+        painter.text(
+            Pos2::new(knob_left, inner.top() + 7.0),
+            Align2::LEFT_CENTER,
+            "CONTROLS",
+            FontId::new(11.0, egui::FontFamily::Name(SG500.into())),
+            TEXT_MUTED,
+        );
+
+        let is_dirty = (self.params.intensity.modulated_normalized_value()
+            - self.params.intensity.default_normalized_value())
+        .abs()
+            > 0.002
+            || (self.params.distance.modulated_normalized_value()
+                - self.params.distance.default_normalized_value())
+            .abs()
+                > 0.002
+            || (self.params.tail.modulated_normalized_value()
+                - self.params.tail.default_normalized_value())
+            .abs()
+                > 0.002
+            || (self.params.width.modulated_normalized_value()
+                - self.params.width.default_normalized_value())
+            .abs()
+                > 0.002
+            || (self.params.mix.modulated_normalized_value()
+                - self.params.mix.default_normalized_value())
+            .abs()
+                > 0.002
+            || (self.params.trim_db.modulated_normalized_value()
+                - self.params.trim_db.default_normalized_value())
+            .abs()
+                > 0.002
+            || self.params.match_loudness.value() != true
+            || self.params.mono_sum.value() != false;
+
+        let reset_btn = Rect::from_min_size(
+            Pos2::new(knob_right - 66.0, inner.top() - 2.0),
+            Vec2::new(66.0, 20.0),
+        );
+        let reset_resp = ui.interact(
+            reset_btn,
+            ui.scope_id().with("reset_defaults"),
+            Sense::click(),
+        );
+        let hovered = reset_resp.hovered() && is_dirty;
+
+        let (btn_bg, btn_stroke, btn_fg) = if is_dirty {
+            if hovered {
+                ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
+                (
+                    mix(BG_CARD, ACCENT, 0.20),
+                    Stroke::new(1.0, ACCENT),
+                    TEXT_PRIMARY,
+                )
+            } else {
+                (
+                    mix(BG_CARD, ACCENT, 0.08),
+                    Stroke::new(1.0, mix(BORDER_SUBTLE, ACCENT, 0.40)),
+                    ACCENT,
+                )
+            }
+        } else {
+            (
+                Color32::TRANSPARENT,
+                Stroke::new(1.0, Color32::from_rgb(0x2a, 0x28, 0x24)),
+                TEXT_FAINT,
+            )
+        };
+
+        w::rounded(painter, reset_btn, 6, btn_bg, btn_stroke);
+        w::reset_icon(
+            painter,
+            Pos2::new(reset_btn.left() + 14.0, reset_btn.center().y),
+            btn_fg,
+        );
+        painter.text(
+            Pos2::new(reset_btn.left() + 24.0, reset_btn.center().y),
+            Align2::LEFT_CENTER,
+            "Reset",
+            FontId::new(11.0, egui::FontFamily::Name(SG500.into())),
+            btn_fg,
+        );
+
+        let clicked = reset_resp.clicked();
+        if is_dirty {
+            let _ = reset_resp.on_hover_text("Reset controls to default values");
+            if clicked {
+                sink.begin(&self.params.intensity);
+                sink.set_norm(
+                    &self.params.intensity,
+                    self.params.intensity.default_normalized_value(),
+                );
+                sink.end(&self.params.intensity);
+
+                sink.begin(&self.params.distance);
+                sink.set_norm(
+                    &self.params.distance,
+                    self.params.distance.default_normalized_value(),
+                );
+                sink.end(&self.params.distance);
+
+                sink.begin(&self.params.tail);
+                sink.set_norm(
+                    &self.params.tail,
+                    self.params.tail.default_normalized_value(),
+                );
+                sink.end(&self.params.tail);
+
+                sink.begin(&self.params.width);
+                sink.set_norm(
+                    &self.params.width,
+                    self.params.width.default_normalized_value(),
+                );
+                sink.end(&self.params.width);
+
+                sink.begin(&self.params.mix);
+                sink.set_norm(&self.params.mix, self.params.mix.default_normalized_value());
+                sink.end(&self.params.mix);
+
+                sink.begin(&self.params.trim_db);
+                sink.set_norm(
+                    &self.params.trim_db,
+                    self.params.trim_db.default_normalized_value(),
+                );
+                sink.end(&self.params.trim_db);
+
+                sink.set_bool(&self.params.match_loudness, true);
+                sink.set_bool(&self.params.mono_sum, false);
+            }
+        }
+
         let gap = 4.0;
         let cell_w = (knob_right - knob_left - gap * 5.0) / 6.0;
-        let knob_top = inner.top() + 14.0;
+        let knob_top = inner.top() + 20.0;
         let knob_h = 118.0;
 
         let is_space = preset

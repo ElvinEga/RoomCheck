@@ -258,6 +258,15 @@ fn draw_arc(
     painter.add(Shape::line(points, Stroke::new(width, colour)));
 }
 
+pub fn reset_icon(painter: &egui::Painter, centre: Pos2, colour: Color32) {
+    let r = 4.0;
+    let stroke = Stroke::new(1.3, colour);
+    draw_arc(painter, centre, r, 0.7, 4.8, 1.3, colour);
+    let tip = centre + Vec2::new(0.7f32.cos(), 0.7f32.sin()) * r;
+    painter.line_segment([tip, Pos2::new(tip.x + 3.0, tip.y - 0.5)], stroke);
+    painter.line_segment([tip, Pos2::new(tip.x + 0.5, tip.y + 3.0)], stroke);
+}
+
 // ---------------------------------------------------------------------------
 // Toggles & buttons
 // ---------------------------------------------------------------------------
