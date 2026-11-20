@@ -5,7 +5,7 @@ use crate::editor::theme::*;
 use egui::{
     Align2, Color32, CornerRadius, Pos2, Rect, Response, Sense, Shape, Stroke, StrokeKind, Ui, Vec2,
 };
-use std::f32::consts::{FRAC_PI_2, PI};
+use std::f32::consts::PI;
 
 pub fn rounded(painter: &egui::Painter, rect: Rect, radius: u8, fill: Color32, stroke: Stroke) {
     painter.rect(
@@ -83,33 +83,43 @@ pub fn dashed_outline(painter: &egui::Painter, rect: Rect, radius: u8, stroke: S
         (Pos2::new(rect.left() + r, rect.top() + r), 180.0),
     ];
 
-    let mut points = Vec::with_capacity(64);
+    let mut points = Vec::with_capacity(40);
     for (centre, start) in corners {
-        for i in 0..=6 {
-            let a = (start + 15.0 * i as f32).to_radians();
+        for i in 0..=8 {
+            let a = (start + (90.0 / 8.0) * i as f32).to_radians();
             points.push(centre + Vec2::new(a.cos(), a.sin()) * r);
         }
     }
+    if let Some(&first) = points.first() {
+        points.push(first);
+    }
 
-    let mut carry = 0.0f32;
+    let dash_len = 4.0f32;
+    let gap_len = 3.5f32;
+    let period = dash_len + gap_len;
+    let mut dist = 0.0f32;
+
     for pair in points.windows(2) {
-        let a = pair[0];
-        let b = pair[1];
-        let len = (b - a).length();
-        if len < 0.01 {
+        let p1 = pair[0];
+        let p2 = pair[1];
+        let seg_len = (p2 - p1).length();
+        if seg_len < 0.001 {
             continue;
         }
-        let dir = (b - a) / len;
-        let mut t = 0.0;
-        while t < len {
-            let phase = (carry + t) % 7.0;
-            let seg_end = (t + (4.0 - phase).max(0.0)).min(len);
-            if phase < 4.0 {
-                painter.line_segment([a + dir * t, a + dir * seg_end], stroke);
+        let dir = (p2 - p1) / seg_len;
+        let mut cur = 0.0;
+        while cur < seg_len {
+            let phase = (dist + cur) % period;
+            if phase < dash_len {
+                let draw_end = (cur + (dash_len - phase)).min(seg_len);
+                painter.line_segment([p1 + dir * cur, p1 + dir * draw_end], stroke);
+                cur = draw_end;
+            } else {
+                let skip_end = (cur + (period - phase)).min(seg_len);
+                cur = skip_end;
             }
-            t += 0.75;
         }
-        carry += len;
+        dist += seg_len;
     }
 }
 
@@ -175,13 +185,13 @@ pub fn knob(
         TEXT_PRIMARY,
     );
 
-    // Dial geometry, scaled from the 80-unit SVG in the design.
-    let dial_centre = Pos2::new(centre_x, pill.bottom() + 5.0 + 30.0);
-    let radius = 30.0;
+    // Dial geometry, scaled so adjacent knob arcs never collide.
+    let dial_centre = Pos2::new(centre_x, pill.bottom() + 6.0 + 25.0);
+    let radius = 25.0;
     let start = 135.0_f32.to_radians();
     let sweep = 270.0_f32.to_radians();
 
-    draw_arc(painter, dial_centre, radius, start, sweep, 4.6, TRACK);
+    draw_arc(painter, dial_centre, radius, start, sweep, 4.2, TRACK);
     if new_norm > 0.002 {
         draw_arc(
             painter,
@@ -189,28 +199,28 @@ pub fn knob(
             radius,
             start,
             sweep * new_norm,
-            4.6,
+            4.2,
             ACCENT,
         );
     }
 
     painter.circle(
         dial_centre,
-        22.2,
+        18.5,
         BG_DIAL,
         Stroke::new(1.5, Color32::from_rgb(0x35, 0x32, 0x2c)),
     );
-    painter.circle_filled(dial_centre, 17.6, BG_DIAL_INNER);
+    painter.circle_filled(dial_centre, 14.5, BG_DIAL_INNER);
 
     let angle = start + sweep * new_norm;
     let dir = Vec2::new(angle.cos(), angle.sin());
     painter.line_segment(
-        [dial_centre + dir * 20.5, dial_centre + dir * 27.5],
-        Stroke::new(2.8, ACCENT),
+        [dial_centre + dir * 17.0, dial_centre + dir * 23.0],
+        Stroke::new(2.4, ACCENT),
     );
 
     painter.text(
-        Pos2::new(centre_x, dial_centre.y + radius + 13.0),
+        Pos2::new(centre_x, dial_centre.y + radius + 11.0),
         Align2::CENTER_CENTER,
         label,
         sg(13.0, 500),
@@ -601,9 +611,13 @@ pub fn draw_icon(ui: &Ui, kind: crate::presets::Icon, rect: Rect, colour: Color3
             outline(Rect::from_min_max(p(7.0, 6.5), p(11.0, 11.0)), 1);
         }
         I::Speaker => {
-            outline(Rect::from_min_max(p(5.0, 3.0), p(19.0, 21.0)), 2);
+            outline(Rect::from_min_max(p(6.0, 3.0), p(18.0, 21.0)), 2);
+            // Tweeter
+            painter.circle_stroke(p(12.0, 7.5), 1.6 * k, s);
+            painter.circle_filled(p(12.0, 7.5), 0.8 * k, colour);
+            // Woofer
             painter.circle_stroke(p(12.0, 15.0), 3.2 * k, s);
-            painter.circle_stroke(p(12.0, 7.5), 1.4 * k, s);
+            painter.circle_stroke(p(12.0, 15.0), 1.2 * k, Stroke::new(1.2, colour));
         }
     }
 }
@@ -652,8 +666,14 @@ pub fn phone_sketch(ui: &Ui, rect: Rect, distance: f32) {
         dashed,
     );
     let cm = (20.0 + d * 80.0).round() as i32;
+    let label_pos = t((124.0 + listener_x) * 0.5, 60.0);
+    painter.rect_filled(
+        Rect::from_center_size(label_pos, Vec2::new(44.0, 15.0)),
+        CornerRadius::same(3),
+        BG_CARD,
+    );
     painter.text(
-        t((124.0 + listener_x) * 0.5, 60.0),
+        label_pos,
         Align2::CENTER_CENTER,
         format!("{cm} cm"),
         mono(11.0, 400),
@@ -757,8 +777,14 @@ pub fn room_sketch(ui: &Ui, rect: Rect, distance: f32) {
         t(190.0, 49.0),
         Stroke::new(1.25, faint),
     );
+    let label_pos = t((listener_x + 190.0) * 0.5, 41.0);
+    painter.rect_filled(
+        Rect::from_center_size(label_pos, Vec2::new(32.0, 14.0)),
+        CornerRadius::same(3),
+        BG_CARD,
+    );
     painter.text(
-        t((listener_x + 190.0) * 0.5, 41.0),
+        label_pos,
         Align2::CENTER_CENTER,
         "1 m",
         mono(10.0, 400),
@@ -837,23 +863,39 @@ pub fn sliders_icon(painter: &egui::Painter, rect: Rect, colour: Color32) {
 }
 
 pub fn logo(painter: &egui::Painter, rect: Rect) {
-    let c = rect.center();
-    let painter = painter.with_clip_rect(rect);
-    painter.circle_filled(Pos2::new(c.x - 7.0, c.y), 3.0, ACCENT);
-    for (r, alpha, width) in [(5.0f32, 255u8, 2.4f32), (9.0, 150, 2.4)] {
-        let pts: Vec<Pos2> = (0..=16)
-            .map(|i| {
-                let a = -0.9 + 1.8 * i as f32 / 16.0;
-                Pos2::new(
-                    c.x - 7.0 + a.cos() * 7.0 + 2.5,
-                    c.y + a.sin() * r,
-                )
-            })
-            .collect();
-        painter.add(Shape::line(
-            pts,
-            Stroke::new(width, Color32::from_rgba_premultiplied(255, 179, 71, alpha)),
-        ));
-    }
-    let _ = FRAC_PI_2;
+    let scale_x = rect.width() / 28.0;
+    let scale_y = rect.height() / 28.0;
+    let pt = |x: f32, y: f32| Pos2::new(rect.left() + x * scale_x, rect.top() + y * scale_y);
+
+    // Speaker dot.
+    painter.circle_filled(pt(7.0, 14.0), 3.0 * scale_x, ACCENT);
+
+    // Radiating sound wave 1: Q bezier from (13, 9) via (17.5, 14) to (13, 19).
+    let stroke1 = Stroke::new(2.4 * scale_x, ACCENT);
+    let pts1: Vec<Pos2> = (0..=16)
+        .map(|i| {
+            let t = i as f32 / 16.0;
+            let mt = 1.0 - t;
+            let x = mt * mt * 13.0 + 2.0 * mt * t * 17.5 + t * t * 13.0;
+            let y = mt * mt * 9.0 + 2.0 * mt * t * 14.0 + t * t * 19.0;
+            pt(x, y)
+        })
+        .collect();
+    painter.add(Shape::line(pts1, stroke1));
+
+    // Radiating sound wave 2: Q bezier from (18, 5.5) via (25.5, 14) to (18, 22.5) with 60% opacity.
+    let stroke2 = Stroke::new(
+        2.4 * scale_x,
+        Color32::from_rgba_premultiplied(255, 179, 71, 153),
+    );
+    let pts2: Vec<Pos2> = (0..=16)
+        .map(|i| {
+            let t = i as f32 / 16.0;
+            let mt = 1.0 - t;
+            let x = mt * mt * 18.0 + 2.0 * mt * t * 25.5 + t * t * 18.0;
+            let y = mt * mt * 5.5 + 2.0 * mt * t * 14.0 + t * t * 22.5;
+            pt(x, y)
+        })
+        .collect();
+    painter.add(Shape::line(pts2, stroke2));
 }

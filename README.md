@@ -16,14 +16,14 @@ Three real, factory-captured IRs are embedded in the binary:
 
 There are **no car, bus, club or concert-hall IRs in this repo**. Roomcheck does not
 invent them — use **Import your own IR (.wav)** to add those. Imported files are copied
-to `~/Library/Application Support/Roomcheck/IRs` and scanned on startup. Filenames
+to `~/Documents/Roomcheck/IRs` and scanned on startup. Filenames
 containing `car`, `bus`, `club`, `hall`, `room`, etc. are grouped under **SPACES**.
 The listener dot in the position sketch follows the **Distance** knob.
 
 ## Custom names and categories for imports
 
 Drop an optional `manifest.json` next to your imported WAVs in
-`~/Library/Application Support/Roomcheck/IRs`. Only `file` is required; every
+`~/Documents/Roomcheck/IRs`. Only `file` is required; every
 other field overrides the filename-based guess:
 
 ```json

@@ -9,7 +9,7 @@ use crate::dsp::{Meters, BLOCK, SPECTRUM_BANDS};
 use crate::params::RoomcheckParams;
 use crate::presets::{self, Category, Icon, Preset};
 use egui::{
-    Align2, Color32, CornerRadius, FontId, Pos2, Rect, Stroke, StrokeKind, Ui, Vec2,
+    Align2, Color32, CornerRadius, FontId, Pos2, Rect, Sense, Stroke, StrokeKind, Ui, Vec2,
 };
 use nice_plug::context::gui::GuiContext;
 use nice_plug::prelude::*;
@@ -390,70 +390,90 @@ impl RoomcheckEditor {
             .map(|(i, _)| i)
             .collect();
 
-        let mut y = search.bottom() + 10.0;
-        y = self.paint_group(ui, painter, sink, "SPEAKERS", &speakers, library, selected, y);
-        y += 6.0;
-        let spaces_end =
-            self.paint_group(ui, painter, sink, "SPACES", &spaces, library, selected, y);
-        let _ = spaces_end;
-
         // Import.
         let import = Rect::from_min_size(
             Pos2::new(14.0, HEIGHT - 14.0 - 56.0),
             Vec2::new(220.0, 56.0),
         );
         w::dashed_outline(painter, import, 10, Stroke::new(1.5, BORDER_STRONG));
+
+        let import_label = "Import your own IR (.wav)";
+        let font_id = sg(12.5, 500);
+        let text_galley = painter.layout_no_wrap(import_label.to_owned(), font_id, TEXT_BODY);
+        let icon_w = 12.0;
+        let gap = 8.0;
+        let total_w = icon_w + gap + text_galley.size().x;
+        let start_x = import.center().x - total_w * 0.5;
+        let plus_cx = start_x + icon_w * 0.5;
+        let plus_cy = import.center().y;
+
         painter.line_segment(
             [
-                Pos2::new(import.center().x - 44.0, import.center().y),
-                Pos2::new(import.center().x - 32.0, import.center().y),
+                Pos2::new(plus_cx - 6.0, plus_cy),
+                Pos2::new(plus_cx + 6.0, plus_cy),
             ],
             Stroke::new(2.0, TEXT_BODY),
         );
         painter.line_segment(
             [
-                Pos2::new(import.center().x - 38.0, import.center().y - 6.0),
-                Pos2::new(import.center().x - 38.0, import.center().y + 6.0),
+                Pos2::new(plus_cx, plus_cy - 6.0),
+                Pos2::new(plus_cx, plus_cy + 6.0),
             ],
             Stroke::new(2.0, TEXT_BODY),
         );
-        painter.text(
-            Pos2::new(import.center().x - 22.0, import.center().y),
-            Align2::LEFT_CENTER,
-            "Import your own IR (.wav)",
-            sg(12.5, 500),
+        painter.galley(
+            Pos2::new(start_x + icon_w + gap, import.center().y - text_galley.size().y * 0.5),
+            text_galley,
             TEXT_BODY,
         );
 
         if w::pressable(ui, ui.scope_id().with("import_ir"), import).clicked() {
             self.import_ir(sink);
         }
+
+        let scroll_rect = Rect::from_min_max(
+            Pos2::new(0.0, search.bottom() + 6.0),
+            Pos2::new(SIDEBAR - 1.0, import.top() - 6.0),
+        );
+        let mut list_ui = ui.new_child(
+            egui::UiBuilder::new()
+                .max_rect(scroll_rect)
+                .layout(egui::Layout::top_down(egui::Align::LEFT)),
+        );
+        egui::ScrollArea::vertical()
+            .id_salt("sidebar_presets_scroll")
+            .auto_shrink([false, false])
+            .show(&mut list_ui, |ui| {
+                ui.spacing_mut().item_spacing = Vec2::ZERO;
+                ui.add_space(4.0);
+                self.paint_group(ui, sink, "SPEAKERS", &speakers, library, selected);
+                ui.add_space(6.0);
+                self.paint_group(ui, sink, "SPACES", &spaces, library, selected);
+            });
     }
 
-    #[allow(clippy::too_many_arguments)]
     fn paint_group(
         &self,
         ui: &mut Ui,
-        painter: &egui::Painter,
         sink: &Sink<'_>,
         title: &str,
         indices: &[usize],
         library: &[Preset],
         selected: usize,
-        mut y: f32,
-    ) -> f32 {
-        painter.text(
-            Pos2::new(24.0, y + 8.0),
+    ) {
+        let (title_rect, _) = ui.allocate_exact_size(Vec2::new(220.0, 20.0), Sense::hover());
+        ui.painter().text(
+            Pos2::new(24.0, title_rect.center().y),
             Align2::LEFT_CENTER,
             title,
             FontId::new(11.0, egui::FontFamily::Name(SG500.into())),
             TEXT_MUTED,
         );
-        y += 20.0;
 
         if indices.is_empty() {
-            painter.text(
-                Pos2::new(24.0, y + 12.0),
+            let (empty_rect, _) = ui.allocate_exact_size(Vec2::new(220.0, 30.0), Sense::hover());
+            ui.painter().text(
+                Pos2::new(24.0, empty_rect.center().y),
                 Align2::LEFT_CENTER,
                 if title == "SPACES" {
                     "Import a room or car IR"
@@ -463,18 +483,17 @@ impl RoomcheckEditor {
                 sg(11.5, 400),
                 TEXT_FAINT,
             );
-            return y + 34.0;
+            return;
         }
 
         for &index in indices {
             let Some(preset) = library.get(index) else {
                 continue;
             };
-            let row = Rect::from_min_size(
-                Pos2::new(14.0, y),
-                Vec2::new(220.0, 38.0),
-            );
+            let (alloc_rect, response) = ui.allocate_exact_size(Vec2::new(220.0, 38.0), Sense::click());
+            let row = Rect::from_min_size(Pos2::new(14.0, alloc_rect.top()), Vec2::new(220.0, 38.0));
             let is_selected = index == selected;
+            let painter = ui.painter();
             if is_selected {
                 let bg = mix(BG_CARD, ACCENT, 0.13);
                 w::rounded(painter, row, 8, bg, Stroke::NONE);
@@ -493,27 +512,33 @@ impl RoomcheckEditor {
                 Rect::from_min_size(Pos2::new(row.left() + 10.0, row.center().y - 10.0), Vec2::splat(20.0)),
                 icon_colour,
             );
-            painter.text(
-                Pos2::new(row.left() + 40.0, row.center().y),
-                Align2::LEFT_CENTER,
-                preset.name.as_str(),
-                sg(14.0, 500),
-                if is_selected { TEXT_PRIMARY } else { TEXT_BODY },
-            );
-            painter.text(
-                Pos2::new(row.right() - 10.0, row.center().y),
-                Align2::RIGHT_CENTER,
-                preset.tag(),
-                mono(11.0, 400),
+
+            let tag = preset.tag();
+            let tag_font = mono(11.0, 400);
+            let tag_galley = painter.layout_no_wrap(tag.to_string(), tag_font, TEXT_MUTED);
+            let tag_w = tag_galley.size().x;
+            painter.galley(
+                Pos2::new(row.right() - 10.0 - tag_w, row.center().y - tag_galley.size().y * 0.5),
+                tag_galley,
                 TEXT_MUTED,
             );
 
-            if w::pressable(ui, ui.scope_id().with(("preset", index)), row).clicked() {
+            let max_name_w = (row.right() - 10.0 - tag_w - 8.0) - (row.left() + 40.0);
+            let name_font = sg(14.0, 500);
+            let name_color = if is_selected { TEXT_PRIMARY } else { TEXT_BODY };
+            let name = truncate_to_width(painter, &preset.name, &name_font, max_name_w);
+            painter.text(
+                Pos2::new(row.left() + 40.0, row.center().y),
+                Align2::LEFT_CENTER,
+                name,
+                name_font,
+                name_color,
+            );
+
+            if response.clicked() {
                 sink.set_int(&self.params.preset, index as i32);
             }
-            y += 38.0;
         }
-        y
     }
 
     fn import_ir(&mut self, sink: &Sink<'_>) {
@@ -1068,6 +1093,41 @@ impl RoomcheckEditor {
 
 }
 
+fn truncate_to_width(
+    painter: &egui::Painter,
+    text: &str,
+    font_id: &FontId,
+    max_w: f32,
+) -> String {
+    let full_w = painter
+        .layout_no_wrap(text.to_owned(), font_id.clone(), Color32::WHITE)
+        .size()
+        .x;
+    if full_w <= max_w {
+        return text.to_owned();
+    }
+    let ellipsis = "…";
+    let ellipsis_w = painter
+        .layout_no_wrap(ellipsis.to_owned(), font_id.clone(), Color32::WHITE)
+        .size()
+        .x;
+    let target_w = (max_w - ellipsis_w).max(0.0);
+    let mut truncated = String::new();
+    for ch in text.chars() {
+        truncated.push(ch);
+        let w = painter
+            .layout_no_wrap(truncated.clone(), font_id.clone(), Color32::WHITE)
+            .size()
+            .x;
+        if w > target_w {
+            truncated.pop();
+            break;
+        }
+    }
+    truncated.push_str(ellipsis);
+    truncated
+}
+
 fn truncate(value: &str, max: usize) -> String {
     if value.chars().count() <= max {
         value.to_owned()
@@ -1190,5 +1250,27 @@ mod tests {
             .count() as f32
             / (WIDTH * HEIGHT);
         assert!(painted > 0.95, "only {:.0}% of the canvas was painted", painted * 100.0);
+    }
+
+    #[test]
+    fn test_truncate_to_width() {
+        let mut harness = Harness::builder()
+            .with_size(egui::vec2(WIDTH, HEIGHT))
+            .with_context_setup(|ctx| {
+                theme::install(ctx);
+            })
+            .build_ui(|ui| {
+                let font = sg(14.0, 500);
+                let painter = ui.painter();
+                let short = truncate_to_width(painter, "Phone", &font, 100.0);
+                assert_eq!(short, "Phone");
+
+                let long = "Very Long Impulse Response Name That Exceeds Available Width";
+                let truncated = truncate_to_width(painter, long, &font, 80.0);
+                assert!(truncated.ends_with('…'));
+                let w = painter.layout_no_wrap(truncated, font, Color32::WHITE).size().x;
+                assert!(w <= 80.0);
+            });
+        harness.run();
     }
 }

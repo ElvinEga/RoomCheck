@@ -131,14 +131,7 @@ pub fn user_ir_dir() -> PathBuf {
         }
     }
     let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_owned());
-    #[cfg(target_os = "macos")]
-    {
-        PathBuf::from(home).join("Library/Application Support/Roomcheck/IRs")
-    }
-    #[cfg(not(target_os = "macos"))]
-    {
-        PathBuf::from(home).join("Roomcheck/IRs")
-    }
+    PathBuf::from(home).join("Documents/Roomcheck/IRs")
 }
 
 /// Read a WAV file into de-interleaved channels at its native sample rate.
@@ -275,39 +268,40 @@ fn classify(name: &str) -> (Category, Icon) {
     let space_words = [
         "car", "bus", "club", "hall", "room", "bed", "venue", "church", "cathedral", "studio",
         "chamber", "train", "plane", "cafe", "bar", "gym", "warehouse", "tunnel", "office",
-        "kitchen", "bathroom", "space", "environment",
+        "kitchen", "bathroom", "space", "environment", "arena", "dome", "cave", "econoline",
+        "navigator", "ford", "lincoln", "sedan",
     ];
     let speaker_words = [
-        "phone", "ipad", "tablet", "laptop", "bluetooth", "speaker", "monitor", "tv", "behritone",
-        "auratone", "headphone", "macbook", "earbud",
+        "phone", "ipad", "tablet", "laptop", "bluetooth", "speaker", "speakers", "monitor", "tv",
+        "behritone", "auratone", "headphone", "macbook", "earbud", "boombox",
     ];
 
     let icon = if n.contains("ipad") || n.contains("tablet") {
         Icon::Tablet
     } else if n.contains("phone") {
         Icon::Phone
-    } else if n.contains("bluetooth") || n.contains("bt") {
+    } else if n.contains("bluetooth") || n.contains("bt") || n.contains("boombox") {
         Icon::Bluetooth
     } else if n.contains("laptop") || n.contains("macbook") {
         Icon::Laptop
-    } else if n.contains("car") || n.contains("sedan") {
+    } else if n.contains("car") || n.contains("sedan") || n.contains("ford") || n.contains("econoline") || n.contains("navigator") || n.contains("lincoln") {
         Icon::Car
     } else if n.contains("bus") {
         Icon::Bus
     } else if n.contains("club") || n.contains("bar") {
         Icon::Club
-    } else if n.contains("hall") || n.contains("church") || n.contains("cathedral") {
+    } else if n.contains("hall") || n.contains("church") || n.contains("cathedral") || n.contains("arena") || n.contains("dome") || n.contains("cave") {
         Icon::Hall
-    } else if n.contains("bed") || n.contains("room") {
+    } else if n.contains("bed") || n.contains("room") || n.contains("kitchen") || n.contains("bathroom") || n.contains("studio") {
         Icon::Bed
     } else {
         Icon::Speaker
     };
 
-    if space_words.iter().any(|w| n.contains(w)) {
-        (Category::Space, icon)
-    } else if speaker_words.iter().any(|w| n.contains(w)) {
+    if speaker_words.iter().any(|w| n.contains(w)) {
         (Category::Speaker, icon)
+    } else if space_words.iter().any(|w| n.contains(w)) {
+        (Category::Space, icon)
     } else {
         (Category::Speaker, Icon::Speaker)
     }
@@ -393,10 +387,14 @@ fn factory(byte: &'static [u8], id: &str, name: &str, icon: Icon) -> Option<Pres
 /// Scan factory + user references. Only headers and one decay pass per file.
 pub fn scan() -> Vec<Preset> {
     let mut presets = Vec::new();
+    let mut seen_names = std::collections::HashSet::new();
+
     if let Some(p) = factory(IPHONE_WAV, "factory:iphone", "iPhone Speaker", Icon::Phone) {
+        seen_names.insert("iphone.wav".to_string());
         presets.push(p);
     }
     if let Some(p) = factory(IPAD_WAV, "factory:ipad", "iPad Speaker", Icon::Tablet) {
+        seen_names.insert("ipad.wav".to_string());
         presets.push(p);
     }
     if let Some(p) = factory(
@@ -405,28 +403,46 @@ pub fn scan() -> Vec<Preset> {
         "Behritone",
         Icon::Speaker,
     ) {
+        seen_names.insert("behritone.wav".to_string());
         presets.push(p);
     }
 
-    let dir = user_ir_dir();
-    if let Ok(entries) = fs::read_dir(&dir) {
-        let mut files: Vec<PathBuf> = entries
-            .flatten()
-            .map(|e| e.path())
-            .filter(|p| {
-                p.extension()
-                    .map(|e| e.eq_ignore_ascii_case("wav"))
-                    .unwrap_or(false)
-            })
-            .collect();
-        files.sort();
-        for path in files.into_iter().take(200) {
-            let too_big = fs::metadata(&path).map(|m| m.len() > 32 * 1024 * 1024).unwrap_or(true);
-            if too_big {
-                continue;
-            }
-            if let Some(p) = preset_from_file(&path) {
-                presets.push(p);
+    let mut scan_dirs = Vec::new();
+    let local_dir = PathBuf::from("Presets");
+    if local_dir.is_dir() {
+        scan_dirs.push(local_dir);
+    }
+    let user_dir = user_ir_dir();
+    if user_dir != PathBuf::from("Presets") {
+        scan_dirs.push(user_dir);
+    }
+
+    for dir in scan_dirs {
+        if let Ok(entries) = fs::read_dir(&dir) {
+            let mut files: Vec<PathBuf> = entries
+                .flatten()
+                .map(|e| e.path())
+                .filter(|p| {
+                    p.extension()
+                        .map(|e| e.eq_ignore_ascii_case("wav"))
+                        .unwrap_or(false)
+                })
+                .collect();
+            files.sort();
+            for path in files.into_iter().take(200) {
+                let Some(file_name) = path.file_name() else { continue };
+                let lower_name = file_name.to_string_lossy().to_ascii_lowercase();
+                if seen_names.contains(&lower_name) {
+                    continue;
+                }
+                let too_big = fs::metadata(&path).map(|m| m.len() > 32 * 1024 * 1024).unwrap_or(true);
+                if too_big {
+                    continue;
+                }
+                if let Some(p) = preset_from_file(&path) {
+                    seen_names.insert(lower_name);
+                    presets.push(p);
+                }
             }
         }
     }
