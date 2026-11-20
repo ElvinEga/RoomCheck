@@ -270,35 +270,19 @@ impl RoomcheckEditor {
         }
 
         w::rounded(painter, pill, 10, BG_INPUT, Stroke::new(1.0, BORDER_SUBTLE));
-        let (name, sub) = preset
-            .map(|p| (p.name.clone(), p.subtitle()))
-            .unwrap_or_else(|| {
-                (
-                    "No reference loaded".to_owned(),
-                    "Import a WAV to begin".to_owned(),
-                )
-            });
-        let name_w = (name.chars().count() as f32 * 8.4).min(150.0);
+        let name = preset
+            .map(|p| p.name.clone())
+            .unwrap_or_else(|| "No reference loaded".to_owned());
+        let font = sg(15.0, 600);
+        let max_w = pill.width() - 28.0;
+        let trimmed_name = truncate_to_width(painter, &name, &font, max_w);
         painter.text(
-            Pos2::new(pill.center().x - 6.0, pill.center().y),
-            Align2::RIGHT_CENTER,
-            name,
-            sg(15.0, 600),
+            pill.center(),
+            Align2::CENTER_CENTER,
+            trimmed_name,
+            font,
             TEXT_PRIMARY,
         );
-        painter.circle_filled(
-            Pos2::new(pill.center().x - 1.0, pill.center().y),
-            1.5,
-            TEXT_FAINT,
-        );
-        painter.text(
-            Pos2::new(pill.center().x + 6.0, pill.center().y),
-            Align2::LEFT_CENTER,
-            sub,
-            sg(13.0, 400),
-            TEXT_MUTED,
-        );
-        let _ = name_w;
 
         // Right side status.
         let sr = self.shared.sample_rate.load(Ordering::Relaxed);
@@ -545,22 +529,41 @@ impl RoomcheckEditor {
                 icon_colour,
             );
 
-            let tag = preset.tag();
-            let tag_font = mono(11.0, 400);
-            let tag_galley = painter.layout_no_wrap(tag.to_string(), tag_font, TEXT_MUTED);
-            let tag_w = tag_galley.size().x;
-            painter.galley(
-                Pos2::new(
-                    row.right() - 10.0 - tag_w,
-                    row.center().y - tag_galley.size().y * 0.5,
-                ),
-                tag_galley,
-                TEXT_MUTED,
-            );
+            let is_speaker = preset.category == Category::Speaker;
+            let (max_name_w, badge) = if is_speaker {
+                let badge_w = 18.0;
+                let badge_h = 16.0;
+                let b = Rect::from_center_size(
+                    Pos2::new(row.right() - 10.0 - badge_w * 0.5, row.center().y),
+                    Vec2::new(badge_w, badge_h),
+                );
+                let label = if preset.channels <= 1 { "M" } else { "S" };
+                let max_w = (b.left() - 8.0) - (row.left() + 40.0);
+                (max_w, Some((b, label)))
+            } else {
+                let max_w = (row.right() - 10.0) - (row.left() + 40.0);
+                (max_w, None)
+            };
 
-            let max_name_w = (row.right() - 10.0 - tag_w - 8.0) - (row.left() + 40.0);
+            if let Some((b, lbl)) = badge {
+                let kbd_bg = Color32::from_rgb(0x1e, 0x1d, 0x1a);
+                let kbd_stroke = Stroke::new(1.0, Color32::from_rgb(0x35, 0x32, 0x2c));
+                painter.rect(b, CornerRadius::same(4), kbd_bg, kbd_stroke, StrokeKind::Inside);
+                painter.text(
+                    b.center(),
+                    Align2::CENTER_CENTER,
+                    lbl,
+                    mono(10.0, 500),
+                    TEXT_MUTED,
+                );
+            }
+
             let name_font = sg(14.0, 500);
-            let name_color = if is_selected { TEXT_PRIMARY } else { TEXT_BODY };
+            let name_color = if is_selected {
+                TEXT_PRIMARY
+            } else {
+                TEXT_BODY
+            };
             let name = truncate_to_width(painter, &preset.name, &name_font, max_name_w);
             painter.text(
                 Pos2::new(row.left() + 40.0, row.center().y),
@@ -947,11 +950,17 @@ impl RoomcheckEditor {
             4.0,
             ACCENT_INK,
         );
+        let name = preset
+            .map(|p| p.name.clone())
+            .unwrap_or_else(|| "Reference".to_owned());
+        let font = sg(14.0, 600);
+        let max_w = reference.width() - 38.0;
+        let label = truncate_to_width(painter, &name, &font, max_w);
         painter.text(
             Pos2::new(reference.left() + 30.0, reference.center().y),
             Align2::LEFT_CENTER,
-            "Reference",
-            sg(14.0, 600),
+            label,
+            font,
             ACCENT_INK,
         );
 
@@ -1155,15 +1164,6 @@ fn truncate_to_width(painter: &egui::Painter, text: &str, font_id: &FontId, max_
     truncated
 }
 
-fn truncate(value: &str, max: usize) -> String {
-    if value.chars().count() <= max {
-        value.to_owned()
-    } else {
-        let mut out: String = value.chars().take(max.saturating_sub(1)).collect();
-        out.push('…');
-        out
-    }
-}
 
 fn mix(a: Color32, b: Color32, t: f32) -> Color32 {
     let t = t.clamp(0.0, 1.0);
