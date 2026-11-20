@@ -548,7 +548,13 @@ impl RoomcheckEditor {
             if let Some((b, lbl)) = badge {
                 let kbd_bg = Color32::from_rgb(0x1e, 0x1d, 0x1a);
                 let kbd_stroke = Stroke::new(1.0, Color32::from_rgb(0x35, 0x32, 0x2c));
-                painter.rect(b, CornerRadius::same(4), kbd_bg, kbd_stroke, StrokeKind::Inside);
+                painter.rect(
+                    b,
+                    CornerRadius::same(4),
+                    kbd_bg,
+                    kbd_stroke,
+                    StrokeKind::Inside,
+                );
                 painter.text(
                     b.center(),
                     Align2::CENTER_CENTER,
@@ -559,11 +565,7 @@ impl RoomcheckEditor {
             }
 
             let name_font = sg(14.0, 500);
-            let name_color = if is_selected {
-                TEXT_PRIMARY
-            } else {
-                TEXT_BODY
-            };
+            let name_color = if is_selected { TEXT_PRIMARY } else { TEXT_BODY };
             let name = truncate_to_width(painter, &preset.name, &name_font, max_name_w);
             painter.text(
                 Pos2::new(row.left() + 40.0, row.center().y),
@@ -735,27 +737,27 @@ impl RoomcheckEditor {
             sg(13.0, 600),
             TEXT_PRIMARY,
         );
-        let map_right = rect.left() + 14.0 + 270.0;
-        painter.circle_filled(
-            Pos2::new(map_right - 88.0, rect.top() + 22.0),
-            3.5,
-            Color32::from_rgb(0x8a, 0x85, 0x7a),
-        );
-        painter.text(
-            Pos2::new(map_right - 81.0, rect.top() + 22.0),
-            Align2::LEFT_CENTER,
-            "Speaker",
-            sg(11.0, 400),
-            TEXT_MUTED,
-        );
-        painter.circle_filled(Pos2::new(map_right - 26.0, rect.top() + 22.0), 3.5, ACCENT);
-        painter.text(
-            Pos2::new(map_right - 4.0, rect.top() + 22.0),
-            Align2::RIGHT_CENTER,
-            "You",
-            sg(11.0, 400),
-            TEXT_MUTED,
-        );
+        // let map_right = rect.left() + 14.0 + 270.0;
+        // painter.circle_filled(
+        //     Pos2::new(map_right - 88.0, rect.top() + 22.0),
+        //     3.5,
+        //     Color32::from_rgb(0x8a, 0x85, 0x7a),
+        // );
+        // painter.text(
+        //     Pos2::new(map_right - 81.0, rect.top() + 22.0),
+        //     Align2::LEFT_CENTER,
+        //     "Speaker",
+        //     sg(11.0, 400),
+        //     TEXT_MUTED,
+        // );
+        // painter.circle_filled(Pos2::new(map_right - 26.0, rect.top() + 22.0), 3.5, ACCENT);
+        // painter.text(
+        //     Pos2::new(map_right - 4.0, rect.top() + 22.0),
+        //     Align2::RIGHT_CENTER,
+        //     "You",
+        //     sg(11.0, 400),
+        //     TEXT_MUTED,
+        // );
 
         let sketch = Rect::from_min_size(
             Pos2::new(rect.left() + 14.0, rect.top() + 40.0),
@@ -1296,7 +1298,6 @@ fn truncate_to_width(painter: &egui::Painter, text: &str, font_id: &FontId, max_
     truncated.push_str(ellipsis);
     truncated
 }
-
 
 fn mix(a: Color32, b: Color32, t: f32) -> Color32 {
     let t = t.clamp(0.0, 1.0);
