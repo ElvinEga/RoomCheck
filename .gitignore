@@ -1,0 +1,20 @@
+# Rust build output (includes target/bundled plugin artifacts)
+/target/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# IDE / editor
+.idea/
+.vscode/
+*.code-workspace
+*.swp
+*~
+
+# Local configuration / logs
+.env
+.env.*
+*.log

@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Roomcheck</title>
+<script src="./_runtime/react.js"></script>
+<script src="./_runtime/react-dom.js"></script>
+<script src="./_runtime/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width:1160px;height:740px;box-sizing:border-box;display:flex;flex-direction:column;background:#0f0f0e;color:#ece8df;font-family:'Space Grotesk',system-ui,sans-serif;border:1px solid #2a2824;border-radius:16px;overflow:hidden;--accent:{{accent}}">
+
+  <!-- Header -->
+  <header style="height:56px;flex:none;box-sizing:border-box;display:flex;align-items:center;gap:16px;padding:0 20px;background:#141311;border-bottom:1px solid #26241f">
+    <div style="width:208px;display:flex;align-items:center;gap:10px">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <circle cx="7" cy="14" r="3" style="fill:var(--accent)"></circle>
+        <path d="M13 9Q17.5 14 13 19" style="stroke:var(--accent)" stroke-width="2.4" stroke-linecap="round"></path>
+        <path d="M18 5.5Q25.5 14 18 22.5" style="stroke:var(--accent)" stroke-width="2.4" stroke-linecap="round" stroke-opacity=".6"></path>
+      </svg>
+      <div style="display:flex;flex-direction:column;gap:1px">
+        <span style="font:600 17px 'Space Grotesk',sans-serif;letter-spacing:.01em;line-height:1.1">Roomcheck</span>
+        <span style="font:500 11px 'Space Grotesk',sans-serif;letter-spacing:.12em;color:#a09b90;line-height:1.1">REFERENCE</span>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:12px">
+      <button aria-label="Previous reference" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:#1c1b18;border:1px solid #2b2925;border-radius:10px;color:#ece8df;cursor:pointer;font-family:inherit">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ece8df" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+      </button>
+      <div style="min-width:300px;height:36px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 16px;background:#1c1b18;border:1px solid #2b2925;border-radius:10px">
+        <span style="font:600 15px 'Space Grotesk',sans-serif">{{envName}}</span>
+        <span style="width:3px;height:3px;border-radius:50%;background:#6d6960"></span>
+        <span style="font:400 13px 'Space Grotesk',sans-serif;color:#a09b90">{{envSub}}</span>
+      </div>
+      <button aria-label="Next reference" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:#1c1b18;border:1px solid #2b2925;border-radius:10px;color:#ece8df;cursor:pointer;font-family:inherit">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ece8df" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+      </button>
+    </div>
+    <div style="width:208px;display:flex;align-items:center;justify-content:flex-end;gap:10px">
+      <span style="font:400 12px 'JetBrains Mono',monospace;color:#a09b90">48 kHz · 256 smp</span>
+      <button aria-label="Settings" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid #2b2925;border-radius:10px;cursor:pointer;font-family:inherit">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a09b90" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"></path><circle cx="16" cy="7" r="2.2"></circle><circle cx="8" cy="17" r="2.2"></circle></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Body -->
+  <div style="flex:1;min-height:0;display:flex">
+
+    <!-- Sidebar -->
+    <aside style="width:248px;flex:none;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;padding:14px;background:#141311;border-right:1px solid #26241f;overflow:hidden">
+      <div style="position:relative;flex:none;margin-bottom:6px">
+        <svg style="position:absolute;left:11px;top:10px" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a09b90" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
+        <input aria-label="Search references" placeholder="Search references" style="width:100%;height:36px;box-sizing:border-box;background:#1c1b18;border:1px solid #2b2925;border-radius:8px;color:#ece8df;padding:0 10px 0 34px;font:400 13px 'Space Grotesk',sans-serif">
+      </div>
+
+      <div style="padding:6px 10px 2px;font:500 11px 'Space Grotesk',sans-serif;letter-spacing:.14em;color:#a09b90">SPEAKERS</div>
+      <sc-for list="{{speakers}}" as="it" hint-placeholder-count="4">
+        <button style="width:100%;height:38px;flex:none;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:0 10px;border:0;border-radius:8px;color:#ece8df;font:500 14px 'Space Grotesk',sans-serif;text-align:left;cursor:pointer;{{it.sel}}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;stroke:{{it.ic}}" aria-hidden="true"><path d="{{it.icon}}"></path></svg>
+          <span style="flex:1">{{it.name}}</span>
+          <span style="font:400 11px 'JetBrains Mono',monospace;color:#a09b90">{{it.tag}}</span>
+        </button>
+      </sc-for>
+
+      <div style="padding:12px 10px 2px;font:500 11px 'Space Grotesk',sans-serif;letter-spacing:.14em;color:#a09b90">SPACES</div>
+      <sc-for list="{{spaces}}" as="it" hint-placeholder-count="5">
+        <button style="width:100%;height:38px;flex:none;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:0 10px;border:0;border-radius:8px;color:#ece8df;font:500 14px 'Space Grotesk',sans-serif;text-align:left;cursor:pointer;{{it.sel}}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;stroke:{{it.ic}}" aria-hidden="true"><path d="{{it.icon}}"></path></svg>
+          <span style="flex:1">{{it.name}}</span>
+          <span style="font:400 11px 'JetBrains Mono',monospace;color:#a09b90">{{it.tag}}</span>
+        </button>
+      </sc-for>
+
+      <button style="margin-top:auto;flex:none;height:56px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:10px;background:transparent;border:1.5px dashed #3a3730;border-radius:10px;color:#cfcac0;font:500 13px 'Space Grotesk',sans-serif;cursor:pointer">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#cfcac0" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        Import your own IR (.wav)
+      </button>
+    </aside>
+
+    <!-- Main -->
+    <main style="flex:1;min-width:0;box-sizing:border-box;padding:16px;display:flex;flex-direction:column;gap:12px">
+
+      <!-- Hero: frequency response -->
+      <section style="flex:none;height:280px;box-sizing:border-box;background:#181715;border:1px solid #26241f;border-radius:12px;padding:16px 18px">
+        <div style="height:22px;margin-bottom:10px;display:flex;align-items:center;gap:20px">
+          <h2 style="margin:0;font:600 14px 'Space Grotesk',sans-serif">Frequency response</h2>
+          <span style="display:flex;align-items:center;gap:7px;font:400 12px 'Space Grotesk',sans-serif;color:#a09b90">
+            <svg width="20" height="4" viewBox="0 0 20 4" aria-hidden="true"><path d="M0 2H20" stroke="#8d897f" stroke-width="1.5" stroke-dasharray="4 3"></path></svg>Original, flat
+          </span>
+          <span style="display:flex;align-items:center;gap:7px;font:400 12px 'Space Grotesk',sans-serif;color:#a09b90">
+            <span style="width:20px;height:3px;border-radius:2px;background:var(--accent)"></span>Through the environment
+          </span>
+          <span style="display:flex;align-items:center;gap:7px;font:400 12px 'Space Grotesk',sans-serif;color:#a09b90">
+            <span style="width:10px;height:10px;border-radius:2px;background:#2d2b27"></span>Your mix
+          </span>
+          <span style="margin-left:auto;font:400 11px 'JetBrains Mono',monospace;color:#a09b90">20 Hz to 20 kHz · 1/6 oct</span>
+        </div>
+        <div style="position:relative;width:840px;height:214px">
+          <svg width="840" height="214" viewBox="0 0 840 214" style="display:block" role="img" aria-label="Frequency response of the selected reference compared with a flat original">
+            <defs>
+              <linearGradient id="rcFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" style="stop-color:var(--accent);stop-opacity:.4"></stop>
+                <stop offset="1" style="stop-color:var(--accent);stop-opacity:.02"></stop>
+              </linearGradient>
+            </defs>
+            <path d="{{barsPath}}" stroke="#ffffff" stroke-opacity=".08" stroke-width="8" fill="none"></path>
+            <path d="{{gridPath}}" stroke="#2a2824" stroke-width="1" fill="none"></path>
+            <path d="{{zeroPath}}" stroke="#8d897f" stroke-width="1.25" stroke-dasharray="4 4" fill="none"></path>
+            <path d="{{areaPath}}" fill="url(#rcFill)"></path>
+            <path d="{{wetPath}}" style="stroke:var(--accent)" stroke-width="2.25" stroke-linejoin="round" fill="none"></path>
+            <path d="{{cursorPath}}" stroke="#ece8df" stroke-opacity=".35" stroke-width="1" stroke-dasharray="2 3" fill="none"></path>
+            <circle cx="{{cur.x}}" cy="{{cur.y}}" r="5" fill="#0f0f0e" style="stroke:var(--accent)" stroke-width="2"></circle>
+          </svg>
+          <sc-for list="{{xLabels}}" as="l" hint-placeholder-count="10">
+            <div style="position:absolute;left:{{l.x}}px;top:198px;transform:translateX(-50%);font:400 11px 'JetBrains Mono',monospace;color:#a09b90">{{l.t}}</div>
+          </sc-for>
+          <sc-for list="{{yLabels}}" as="l" hint-placeholder-count="5">
+            <div style="position:absolute;left:0;top:{{l.y}}px;width:28px;text-align:right;font:400 11px 'JetBrains Mono',monospace;color:#a09b90">{{l.t}}</div>
+          </sc-for>
+          <div style="position:absolute;left:{{tip.x}}px;top:{{tip.y}}px;padding:4px 8px;background:#0f0f0e;border:1px solid #34312b;border-radius:6px;font:500 12px 'JetBrains Mono',monospace;color:#ece8df;white-space:nowrap">{{tip.text}}</div>
+        </div>
+      </section>
+
+      <!-- Middle row -->
+      <div style="flex:none;height:148px;display:flex;gap:12px">
+
+        <!-- Map -->
+        <section style="flex:1.25 1 0;min-width:0;box-sizing:border-box;background:#181715;border:1px solid #26241f;border-radius:12px;padding:14px;display:flex;gap:14px">
+          <div style="width:270px;flex:none;display:flex;flex-direction:column;gap:6px">
+            <div style="height:20px;display:flex;align-items:center;gap:12px">
+              <h2 style="margin:0;font:600 13px 'Space Grotesk',sans-serif">{{mapTitle}}</h2>
+              <span style="margin-left:auto;display:flex;align-items:center;gap:5px;font:400 11px 'Space Grotesk',sans-serif;color:#a09b90"><span style="width:7px;height:7px;border-radius:50%;background:#8a857a"></span>Speaker</span>
+              <span style="display:flex;align-items:center;gap:5px;font:400 11px 'Space Grotesk',sans-serif;color:#a09b90"><span style="width:7px;height:7px;border-radius:50%;background:var(--accent)"></span>You</span>
+            </div>
+            <sc-if value="{{isCar}}" hint-placeholder-val="{{ true }}">
+              <svg width="270" height="98" viewBox="0 0 270 98" fill="none" role="img" aria-label="Top-down sketch of a car with speaker positions and the listener in the driver seat">
+                <rect x="32" y="10" width="206" height="78" rx="26" stroke="#4a463e" stroke-width="1.5"></rect>
+                <path d="M178 22L196 30V68L178 76Z" stroke="#4a463e" stroke-width="1.5" stroke-linejoin="round"></path>
+                <path d="M78 22L64 31V67L78 76Z" stroke="#4a463e" stroke-width="1.5" stroke-linejoin="round"></path>
+                <rect x="140" y="24" width="16" height="18" rx="4" stroke="#3a372f" stroke-width="1.5"></rect>
+                <rect x="140" y="56" width="16" height="18" rx="4" stroke="#3a372f" stroke-width="1.5"></rect>
+                <rect x="102" y="22" width="14" height="54" rx="5" stroke="#3a372f" stroke-width="1.5"></rect>
+                <circle cx="150" cy="15" r="4" fill="#8a857a"></circle>
+                <circle cx="150" cy="83" r="4" fill="#8a857a"></circle>
+                <circle cx="110" cy="15" r="4" fill="#8a857a"></circle>
+                <circle cx="110" cy="83" r="4" fill="#8a857a"></circle>
+                <circle cx="201" cy="19" r="2.5" fill="#8a857a"></circle>
+                <circle cx="201" cy="79" r="2.5" fill="#8a857a"></circle>
+                <circle cx="52" cy="49" r="6" fill="#8a857a"></circle>
+                <circle cx="148" cy="33" r="11" style="stroke:var(--accent)" stroke-opacity=".4" stroke-width="1.5"></circle>
+                <circle cx="148" cy="33" r="5" style="fill:var(--accent)"></circle>
+              </svg>
+            </sc-if>
+            <sc-if value="{{isPhone}}" hint-placeholder-val="{{ false }}">
+              <svg width="270" height="98" viewBox="0 0 270 98" fill="none" role="img" aria-label="Sketch of a phone playing sound toward a listener forty centimeters away">
+                <rect x="30" y="6" width="46" height="86" rx="9" stroke="#4a463e" stroke-width="1.5"></rect>
+                <rect x="35" y="14" width="36" height="62" rx="3" stroke="#3a372f" stroke-width="1.5"></rect>
+                <path d="M44 84H62" stroke="#8a857a" stroke-width="2" stroke-linecap="round"></path>
+                <path d="M84 74Q91 82 84 90M92 68Q103 82 92 96M100 62Q113 82 100 98" stroke="#8a857a" stroke-width="1.5" stroke-linecap="round" stroke-opacity=".8"></path>
+                <path d="M124 78L192 62" stroke="#6d6960" stroke-width="1.25" stroke-dasharray="3 4"></path>
+                <circle cx="204" cy="59" r="11" style="stroke:var(--accent)" stroke-opacity=".4" stroke-width="1.5"></circle>
+                <circle cx="204" cy="59" r="5" style="fill:var(--accent)"></circle>
+                <text x="140" y="60" fill="#a09b90" font-size="11" font-family="JetBrains Mono, monospace">40 cm</text>
+              </svg>
+            </sc-if>
+          </div>
+          <div style="flex:1;min-width:0;border-left:1px solid #26241f;padding-left:14px;display:flex;flex-direction:column;justify-content:center;gap:9px">
+            <sc-for list="{{metaRows}}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline">
+                <span style="font:400 12px 'Space Grotesk',sans-serif;color:#a09b90">{{r.k}}</span>
+                <span style="font:500 12px 'JetBrains Mono',monospace;color:#ece8df">{{r.v}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- Decay -->
+        <section style="flex:1 1 0;min-width:0;box-sizing:border-box;background:#181715;border:1px solid #26241f;border-radius:12px;padding:14px">
+          <div style="height:20px;display:flex;align-items:center;margin-bottom:6px">
+            <h2 style="margin:0;font:600 13px 'Space Grotesk',sans-serif">Decay</h2>
+            <span style="margin-left:auto;font:500 12px 'JetBrains Mono',monospace;color:var(--accent)">RT60 {{rtText}}</span>
+          </div>
+          <div style="position:relative;width:358px">
+            <svg width="358" height="78" viewBox="0 0 358 78" fill="none" style="display:block" role="img" aria-label="Energy decay of the selected reference over time">
+              <defs>
+                <linearGradient id="rcDecay" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" style="stop-color:var(--accent);stop-opacity:.35"></stop>
+                  <stop offset="1" style="stop-color:var(--accent);stop-opacity:.02"></stop>
+                </linearGradient>
+              </defs>
+              <path d="M0 77.5H358" stroke="#2a2824" stroke-width="1"></path>
+              <path d="{{decayArea}}" fill="url(#rcDecay)"></path>
+              <path d="{{decayPath}}" style="stroke:var(--accent)" stroke-width="1.5" stroke-linejoin="round" stroke-opacity=".75"></path>
+              <path d="{{erPath}}" style="stroke:var(--accent)" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font:400 11px 'JetBrains Mono',monospace;color:#a09b90">
+              <sc-for list="{{decayTicks}}" as="t" hint-placeholder-count="4"><span>{{t.t}}</span></sc-for>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Control rack -->
+      <section style="flex:1;min-height:0;box-sizing:border-box;background:#181715;border:1px solid #26241f;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:18px">
+
+        <div style="width:196px;flex:none;display:flex;flex-direction:column;gap:8px">
+          <span style="font:500 11px 'Space Grotesk',sans-serif;letter-spacing:.14em;color:#a09b90">LISTEN THROUGH</span>
+          <button aria-pressed="false" style="height:46px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:transparent;border:1px solid #3a372f;border-radius:10px;color:#ece8df;font:500 14px 'Space Grotesk',sans-serif;cursor:pointer">
+            <span>Original</span>
+            <span style="font:400 11px 'JetBrains Mono',monospace;color:#a09b90">hold Space</span>
+          </button>
+          <button aria-pressed="true" style="height:46px;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--accent);border:0;border-radius:10px;color:#1a1208;font:600 14px 'Space Grotesk',sans-serif;cursor:pointer;box-shadow:0 0 26px color-mix(in srgb, var(--accent) 32%, transparent)">
+            <span style="width:8px;height:8px;border-radius:50%;background:#1a1208;flex:none"></span>
+            <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{envName}}</span>
+          </button>
+        </div>
+
+        <div style="width:1px;align-self:stretch;background:#26241f"></div>
+
+        <div style="flex:1;min-width:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;align-items:center">
+          <sc-for list="{{knobs}}" as="k" hint-placeholder-count="6">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+              <div style="min-width:62px;height:24px;box-sizing:border-box;padding:0 8px;display:flex;align-items:center;justify-content:center;background:#100f0e;border:1px solid #2b2925;border-radius:8px;font:500 12px 'JetBrains Mono',monospace;color:#ece8df">{{k.val}}</div>
+              <svg width="74" height="74" viewBox="0 0 80 80" fill="none" role="img" aria-label="{{k.aria}}">
+                <circle cx="40" cy="40" r="32" stroke="#2c2a26" stroke-width="5" stroke-linecap="round" stroke-dasharray="150.8 201.06" transform="rotate(135 40 40)"></circle>
+                <circle cx="40" cy="40" r="32" style="stroke:var(--accent)" stroke-width="5" stroke-linecap="round" stroke-dasharray="{{k.dash}}" transform="rotate(135 40 40)"></circle>
+                <circle cx="40" cy="40" r="24" fill="#201f1c" stroke="#35322c" stroke-width="1.5"></circle>
+                <circle cx="40" cy="40" r="19" fill="#262420"></circle>
+                <line x1="40" y1="24" x2="40" y2="31" style="stroke:var(--accent)" stroke-width="3" stroke-linecap="round" transform="rotate({{k.rot}} 40 40)"></line>
+              </svg>
+              <span style="font:500 13px 'Space Grotesk',sans-serif;color:#cfcac0">{{k.label}}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="width:1px;align-self:stretch;background:#26241f"></div>
+
+        <div style="width:232px;flex:none;display:flex;flex-direction:column;gap:9px">
+          <span style="font:500 11px 'Space Grotesk',sans-serif;letter-spacing:.14em;color:#a09b90">LOUDNESS · LUFS-M</span>
+          <sc-for list="{{meters}}" as="m" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="width:76px;font:400 12px 'Space Grotesk',sans-serif;color:#a09b90">{{m.label}}</span>
+              <div style="flex:1;height:8px;background:#26241f;border-radius:4px;overflow:hidden"><div style="height:8px;border-radius:4px;width:{{m.w}};background:{{m.color}}"></div></div>
+              <span style="width:38px;text-align:right;font:500 12px 'JetBrains Mono',monospace;color:#ece8df">{{m.val}}</span>
+            </div>
+          </sc-for>
+          <div style="height:1px;background:#26241f;margin:2px 0"></div>
+          <sc-for list="{{toggles}}" as="t" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font:500 13px 'Space Grotesk',sans-serif;color:#cfcac0">{{t.label}}</span>
+              <button role="switch" aria-checked="{{t.aria}}" aria-label="{{t.label}}" style="position:relative;width:38px;height:22px;padding:0;border:0;border-radius:11px;cursor:pointer;flex:none;{{t.track}}"><span style="position:absolute;top:3px;width:16px;height:16px;border-radius:50%;{{t.thumb}}"></span></button>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mode":{"editor":"enum","default":"car","options":["car","phone"],"section":"Reference"},"accent":{"editor":"color","default":"#ffb347","options":["#ffb347","#7fd8c8","#ff7a59","#a99bff"],"section":"Look"},"$preview":{"width":1160,"height":740}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const P = this.props.mode === 'phone';
+    const accent = this.props.accent ?? '#ffb347';
+    const ln = Math.log;
+    const PX0 = 34, PW = 798, PY0 = 6, PH = 184;
+    const l20 = Math.log10(20);
+    const fx = (f) => PX0 + (Math.log10(f) - l20) / 3 * PW;
+    const fy = (db) => PY0 + (12 - db) / 36 * PH;
+    const g = (L, c, w) => Math.exp(-((L - ln(c)) ** 2) / (2 * w * w));
+    const sg = (x) => 1 / (1 + Math.exp(-x));
+    const r1 = (n) => Math.round(n * 10) / 10;
+    const wet = (f) => {
+      const L = ln(f);
+      let d;
+      if (P) {
+        d = -30 * sg((ln(380) - L) / 0.28) + 5 * g(L, 1800, 0.2) + 3 * g(L, 3200, 0.12)
+          - 2.5 * g(L, 700, 0.3) - 22 * sg((L - ln(9000)) / 0.22)
+          + 1.2 * (0.8 * Math.sin(L * 19) + 0.5 * Math.sin(L * 47 + 1.3));
+      } else {
+        d = 6 * g(L, 85, 0.3) + 2.5 * g(L, 220, 0.3) - 2 * g(L, 1100, 0.4) - 5 * g(L, 2400, 0.35)
+          + 3 * g(L, 5800, 0.14) - 14 * sg((L - ln(10500)) / 0.28) - 20 * sg((ln(38) - L) / 0.22)
+          + 0.8 * Math.sin(L * 19) + 0.5 * Math.sin(L * 47 + 1.3);
+      }
+      return Math.max(-24, Math.min(12, d));
+    };
+
+    // Response curve
+    const N = 240;
+    let wetPath = '';
+    for (let i = 0; i < N; i++) {
+      const f = 20 * Math.pow(1000, i / (N - 1));
+      wetPath += (i ? ' L' : 'M') + r1(fx(f)) + ' ' + r1(fy(wet(f)));
+    }
+    const bottom = PY0 + PH;
+    const areaPath = wetPath + ' L' + (PX0 + PW) + ' ' + bottom + ' L' + PX0 + ' ' + bottom + ' Z';
+
+    // Grid
+    const vf = [50, 100, 200, 500, 1000, 2000, 5000, 10000];
+    let gridPath = '';
+    vf.forEach((f) => { gridPath += 'M' + r1(fx(f)) + ' ' + PY0 + ' V' + bottom + ' '; });
+    const hd = [6, -6, -12, -18];
+    hd.forEach((d) => { gridPath += 'M' + PX0 + ' ' + r1(fy(d)) + ' H' + (PX0 + PW) + ' '; });
+    gridPath += 'M' + PX0 + ' ' + bottom + ' H' + (PX0 + PW);
+    const zeroPath = 'M' + PX0 + ' ' + r1(fy(0)) + ' H' + (PX0 + PW);
+
+    // Input spectrum bars
+    let barsPath = '';
+    const NB = 76;
+    for (let i = 0; i < NB; i++) {
+      const f = 20 * Math.pow(1000, i / (NB - 1));
+      let v = 0.62 - 0.22 * (i / NB) + 0.16 * Math.sin(i * 1.7) + 0.09 * Math.sin(i * 0.63 + 2);
+      v = Math.max(0.1, Math.min(0.95, v));
+      barsPath += 'M' + r1(fx(f)) + ' ' + bottom + ' V' + r1(bottom - v * PH * 0.78) + ' ';
+    }
+
+    // Labels
+    const fl = [[20, '20'], [50, '50'], [100, '100'], [200, '200'], [500, '500'], [1000, '1k'], [2000, '2k'], [5000, '5k'], [10000, '10k'], [20000, '20k']];
+    const xLabels = fl.map((a) => ({ x: r1(fx(a[0])), t: a[1] }));
+    const yl = [[6, '+6'], [0, '0'], [-6, '−6'], [-12, '−12'], [-18, '−18']];
+    const yLabels = yl.map((a) => ({ y: r1(fy(a[0]) - 7), t: a[1] }));
+
+    // Cursor + tooltip
+    const cf = P ? 1800 : 92;
+    const cdb = wet(cf);
+    const cur = { x: r1(fx(cf)), y: r1(fy(cdb)) };
+    const cursorPath = 'M' + cur.x + ' ' + PY0 + ' V' + bottom;
+    const fText = cf >= 1000 ? (cf / 1000) + ' kHz' : cf + ' Hz';
+    const dText = (cdb >= 0 ? '+' : '−') + Math.abs(cdb).toFixed(1) + ' dB';
+    const tip = { x: cur.x + 12, y: Math.max(2, r1(cur.y - 34)), text: fText + '  ' + dText };
+
+    // Decay
+    const rt = P ? 0.02 : 0.38;
+    const span = P ? 0.09 : 0.6;
+    const DW = 358, DB = 77, DT = 4, DH = 73;
+    let decayPath = '';
+    const ND = 200;
+    for (let i = 0; i < ND; i++) {
+      const t = i / (ND - 1) * span;
+      let db = -60 / rt * t;
+      db += 3.5 * Math.sin(t * (P ? 2100 : 290)) * Math.exp(-t / rt) + 1.5 * Math.sin(t * (P ? 5200 : 730) + 1);
+      db = Math.min(0, Math.max(-60, db));
+      decayPath += (i ? ' L' : 'M') + r1(i / (ND - 1) * DW) + ' ' + r1(DT + (-db / 60) * DH);
+    }
+    const decayArea = decayPath + ' L' + DW + ' ' + DB + ' L0 ' + DB + ' Z';
+    const er = P ? [[0.0015, -8], [0.004, -14], [0.0078, -20]] : [[0.008, -6], [0.019, -9], [0.031, -12], [0.047, -16], [0.071, -21]];
+    let erPath = '';
+    er.forEach((e) => { erPath += 'M' + r1(e[0] / span * DW) + ' ' + DB + ' V' + r1(DT + (-e[1] / 60) * DH) + ' '; });
+    const decayTicks = (P ? ['0', '30', '60', '90 ms'] : ['0', '0.2', '0.4', '0.6 s']).map((t) => ({ t }));
+
+    // Sidebar
+    const icons = {
+      phone: 'M8 3h8a1.5 1.5 0 0 1 1.5 1.5v15A1.5 1.5 0 0 1 16 21H8a1.5 1.5 0 0 1-1.5-1.5v-15A1.5 1.5 0 0 1 8 3z M10.5 18h3',
+      tablet: 'M6 3h12a1.5 1.5 0 0 1 1.5 1.5v15A1.5 1.5 0 0 1 18 21H6a1.5 1.5 0 0 1-1.5-1.5v-15A1.5 1.5 0 0 1 6 3z M12 18h.01',
+      bt: 'M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M9 15.5a3 3 0 1 0 6 0a3 3 0 1 0-6 0 M12 7.5h.01',
+      laptop: 'M5 6h14a1 1 0 0 1 1 1v9H4V7a1 1 0 0 1 1-1z M2.5 19h19',
+      car: 'M4 17v-4l1.8-4.5A1.5 1.5 0 0 1 7.2 7.5h9.6a1.5 1.5 0 0 1 1.4 1L20 13v4z M4 13h16 M7.5 17v1.5 M16.5 17v1.5',
+      club: 'M4 10v4 M8 6v12 M12 8.5v7 M16 4.5v15 M20 10v4',
+      bus: 'M5 4h14a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z M4 11h16 M7.5 17v2.5 M16.5 17v2.5 M8 14h.01 M16 14h.01',
+      hall: 'M3 20h18 M5 20V10l7-6 7 6v10 M9.5 20v-5.5a2.5 2.5 0 0 1 5 0V20',
+      bed: 'M3 19v-8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8 M3 15.5h18 M7 9V6.5h4V9'
+    };
+    const selName = P ? 'iPhone Speaker' : 'Car Interior';
+    const selStyle = 'background:color-mix(in srgb, var(--accent) 13%, #181715);box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);';
+    const mk = (name, tag, icon) => {
+      const s = name === selName;
+      return { name, tag, icon: icons[icon], sel: s ? selStyle : 'background:transparent;', ic: s ? 'var(--accent)' : '#a09b90' };
+    };
+    const speakers = [mk('iPhone Speaker', 'MONO', 'phone'), mk('iPad Speaker', 'STEREO', 'tablet'), mk('Small Bluetooth', 'MONO', 'bt'), mk('Laptop Speakers', 'STEREO', 'laptop')];
+    const spaces = [mk('Car Interior', '0.42 s', 'car'), mk('Club', '1.9 s', 'club'), mk('Bus Interior', '0.6 s', 'bus'), mk('Concert Hall', '2.8 s', 'hall'), mk('Bedroom', '0.3 s', 'bed')];
+
+    // Knobs
+    const KA = 150.8, KC = 201.06;
+    const kd = P
+      ? [['Intensity', '100%', 0.667], ['Distance', '40 cm', 0.4], ['Tail', '1.00×', 0.43], ['Width', '0%', 0], ['Mix', '100%', 1], ['Trim', '0.0 dB', 0.5]]
+      : [['Intensity', '100%', 0.667], ['Distance', '35%', 0.35], ['Tail', '1.00×', 0.43], ['Width', '100%', 0.5], ['Mix', '100%', 1], ['Trim', '0.0 dB', 0.5]];
+    const knobs = kd.map((k) => ({
+      label: k[0], val: k[1],
+      dash: r1(KA * k[2]) + ' ' + KC,
+      rot: r1(-135 + 270 * k[2]),
+      aria: k[0] + ' ' + k[1]
+    }));
+
+    const meters = [
+      { label: 'Original', val: '−14.1', w: '66%', color: '#7fd8c8' },
+      { label: 'Environment', val: '−14.1', w: '66%', color: 'var(--accent)' }
+    ];
+    const tog = (label, on) => ({
+      label, aria: on ? 'true' : 'false',
+      track: on ? 'background:var(--accent);' : 'background:#34312b;',
+      thumb: on ? 'left:19px;background:#1a1208;' : 'left:3px;background:#a09b90;'
+    });
+    const toggles = [tog('Match loudness', true), tog('Mono sum', P)];
+
+    return {
+      accent,
+      envName: selName,
+      envSub: P ? 'Bottom speaker · mono' : 'Sedan · driver seat',
+      isCar: !P,
+      isPhone: P,
+      mapTitle: P ? 'Playback position' : 'Listening position',
+      metaRows: P
+        ? [{ k: 'Source', v: 'Measured' }, { k: 'IR length', v: '0.03 s' }, { k: 'RT60', v: '< 0.05 s' }, { k: 'Channels', v: 'Mono' }]
+        : [{ k: 'Source', v: 'Measured' }, { k: 'IR length', v: '0.42 s' }, { k: 'RT60', v: '0.38 s' }, { k: 'Channels', v: 'True stereo' }],
+      rtText: P ? '< 0.05 s' : '0.38 s',
+      speakers, spaces, knobs, meters, toggles,
+      wetPath, areaPath, gridPath, zeroPath, barsPath, cursorPath, cur, tip, xLabels, yLabels,
+      decayPath, decayArea, erPath, decayTicks
+    };
+  }
+}
+</script>
+</body>
+</html>

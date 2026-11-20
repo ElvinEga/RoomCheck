@@ -1,0 +1,3 @@
+# Human-readable plugin bundle name used by `cargo xtask bundle`.
+[roomcheck]
+name = "Roomcheck"

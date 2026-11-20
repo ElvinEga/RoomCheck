@@ -1,0 +1,34 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1160,
+      "h": 740,
+      "title": "Environment preset: Car Interior"
+    },
+    {
+      "file": "Speaker.dc.html",
+      "x": 1240,
+      "y": 0,
+      "w": 1160,
+      "h": 740,
+      "title": "Speaker preset: iPhone Speaker"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "t1",
+      "x": 0,
+      "y": -260,
+      "w": 240,
+      "maxW": 2400,
+      "text": "Roomcheck: environment and speaker reference plugin",
+      "kind": "title1"
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}
