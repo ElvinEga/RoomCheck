@@ -349,15 +349,17 @@ impl RoomcheckEditor {
             BG_INPUT,
             Stroke::new(1.0, BORDER_SUBTLE),
         );
+        let icon_cy = search.center().y;
+
         painter.circle_stroke(
-            Pos2::new(search.left() + 18.0, search.center().y - 1.0),
+            Pos2::new(search.left() + 18.0, icon_cy - 2.0),
             5.0,
             Stroke::new(1.8, TEXT_MUTED),
         );
         painter.line_segment(
             [
-                Pos2::new(search.left() + 22.0, search.center().y + 3.0),
-                Pos2::new(search.left() + 26.0, search.center().y + 7.0),
+                Pos2::new(search.left() + 22.0, icon_cy + 2.0),
+                Pos2::new(search.left() + 26.0, icon_cy + 6.0),
             ],
             Stroke::new(1.8, TEXT_MUTED),
         );
@@ -370,7 +372,7 @@ impl RoomcheckEditor {
             edit_rect,
             egui::TextEdit::singleline(&mut search_text)
                 .frame(egui::Frame::NONE)
-                .hint_text(egui::RichText::new("Search references").color(TEXT_FAINT))
+                .hint_text(egui::RichText::new("Search").color(TEXT_FAINT))
                 .font(sg(13.0, 400))
                 .text_color(TEXT_PRIMARY)
                 .desired_width(edit_rect.width()),
