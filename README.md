@@ -4,6 +4,8 @@ A reference plugin for checking how a mix translates to small speakers and real 
 Built in pure Rust with `nice-plug` + `nice-plug-egui`; ships as **VST3** and **CLAP**
 for macOS. The GUI is a hand-painted 1160×740 recreation of `Design/Main.dc.html`.
 
+![Roomcheck Preview](assets/screenshot.jpg)
+
 ## What is included
 
 Three real, factory-captured IRs are embedded in the binary:
